@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 #Ticket
 ##9
 #Create Steam Name Handler
@@ -26,16 +25,3 @@ def SteamNameCheck(userName: str) -> bool:
     #otherwise, return true
     else:
         return True
-=======
-
-
-global SteamNameCheck
-
-
-def SteamNameCheck(userName):
-    if (len(userName) > 32 or len(userName) < 2):
-        return False
-    else:
-        return True
-    
->>>>>>> 45c2ec591d3cfa11987d85df133ce5b188b794ba
