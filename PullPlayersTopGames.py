@@ -1,12 +1,16 @@
-def pullPlayersTopGames(steam_user_id):
-    # Here, would be my code to pull the top 5 most played games 
+def pullPlayersTopGames(apiKey, steamIds):
+    player_info = getSteamPlayerInfo(apiKey, steamIds)
     
-    # -access steamAPI and collect top 5 games from players profile 
-    #  that is called in the parameters-
-
-    # for the given steam_user_id from the steamAPI
-    
-    # return top 5 games
-    top_games = ["Game 1", "Game 2", "Game 3", "Game 4", "Game 5"]
-    
-    return top_games
+    if player_info:
+        # Assuming the top 5 most played games are found in 'game_count' field of each player info
+        # Extracting top 5 games from player info
+        top_games = []
+        for player in player_info:
+            top_games.extend(player.get('game_count', []))
+        
+        # Sorting the games based on their play counts
+        top_games.sort(reverse=True)
+        
+        return top_games[:5]  # Returning top 5 most played games
+    else:
+        return None
