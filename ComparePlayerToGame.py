@@ -1,13 +1,24 @@
 from InvalidListException import InvalidListException
 
+
+# Ticket 12
 class ComparePlayerToGame:
 
     # Side formula: Used only in the main formula
     # Input: Two lists of ints or floats
     # Output: New list with listB[0] as newList[0] and the positive distance as newList[1]
-    # If listA size > listB size, create a copy of listB the same size as listA, with 0 as the extra values
+    # Can Assume listA size == listB size
     def distanceTwoLists(listA, listB):
         returnList = [listB[0], 0]
+
+
+        sum = 0
+        for i in range(1, listA.__sizeof__ + 1):
+            sum += (listA[i]-listB[i])^2
+            
+        
+        num = sum^1/2
+        returnList[1] = num
 
         return returnList
 
@@ -25,10 +36,16 @@ class ComparePlayerToGame:
         print("Start ComparePlayerToGame \n")
         shouldBeListSize = 4
         for testList in enterList:
-            if not isinstance(testList, list):
+            if (isinstance(testList, list) == False):
                 raise InvalidListException("Invalid Entry: Not a list\n")
-            if not (len(testList) == listSizes):
+            if (len(testList) != listSizes):
                 raise InvalidListException("Invalid Entry: List is too small\n")
+            
+            for i in range(1, testList.__sizeof__ + 1):
+                if(isinstance(testList[i], int) == False and isinstance(testList[i], float) == False):
+                    raise InvalidListException("Invalid Entry: One of the values is NaN")
+        
+
 
         print("All lists confirmed\n")
         print("Judging distances\n")
@@ -38,10 +55,11 @@ class ComparePlayerToGame:
         playerSecondScore = playerList[2]
         playerThirdScore = playerList[3]
 
-
-        # check all of the values to make sure they're all of the correct instance (int or float)
-
         # For list in enterlist[1] to enterlist[end]
+        clone = enterList.copy()
+        clone.remove(enterList[0])
+
+        return clone
         # Check all values to make sure they're correct
         # Check distances between said list and PlayerList using Distance Formula, and add them to a list
 
