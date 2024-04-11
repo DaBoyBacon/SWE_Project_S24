@@ -59,14 +59,22 @@ class ComparePlayerToGame:
         
         clone = enterList.copy()
         clone.remove(enterList[0])
+
+        outputList = []
+
+
+        for listFromClone in clone:
+            addThisList = ComparePlayerToGame.distanceTwoLists(playerList, listFromClone)
+            outputList.append(addThisList)
+
         
+
+
+
         
-
-
-
-        return clone
         # Check all values to make sure they're correct
         # Check distances between said list and PlayerList using Distance Formula, and add them to a list
 
         # Sort masterlist by list[x][1]
         # return masterlist
+        return outputList
