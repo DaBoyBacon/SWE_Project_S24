@@ -20,3 +20,13 @@ How to edit as part of the dev team:
 - Rebase with main to ensure everything matches
 - Push to YOUR BRANCH - any merging with main will be done by lead devs
 - You aren't getting paid for this so don't expect to be compensated. This is a project for a class.
+
+
+GAMES SCORING CHART
+0 = not at all so
+10 = as element as you can get
+Element #: Name of element
+0: Name of Game
+1: OpenWorldness
+2: Combat-oriented
+3: Animation
