@@ -1,31 +1,35 @@
-import requests # Start with importing requests library to make HTTP requests to use the Steam API
+# GetSteamPlayerInfo.py
+import requests  # This line imports the 'requests' library which is used for making HTTP requests in Python. If you are getting errors here you need to
+# install the requests library.
 
-def getSteamPlayerInfo(apiKey, steamIds): # The getSteamPlayerInfo takes two parameters, the API key and the steam IDs
-
-    # Convert list of Steam IDs to the correct format
-    if isinstance(steamIds, list): # Is instance function checks if steamIds is a list
-        steamIds = ','.join(steamIds) # If it is a list it joins the Steam IDs into a comma-separated string because the Steam API expects the Steam IDs to be passed as such.
-
-    # Construct the request URL
-    url = f"http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/" # Have to combine the base URL with the requested parameters key and steamIds
-    params = { # Creates a dictionary called params to store the query parameters
-        'key': apiKey,
-        'steamids': steamIds
+# Define a function named 'getOwnedGames' which takes two parameters: 'apiKey' and 'steamId'. We need to figure a good way to input these from GUI.
+def getOwnedGames(apiKey, steamId):
+    # This is the URL to Steam's GetOwnedGames API which returns a list of games owned by a specific user. Different URL's will return different info.
+    url = "https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/"
+    
+    # Parameters to be sent with the HTTP request to specify the API key, user's Steam ID, and additional options.
+    params = {
+        'key': apiKey,  # The Steam Web API key.
+        'steamid': steamId,  # The Steam ID of the user whose game list you want to retrieve.
+        'include_appinfo': True,  # Option to include the name and other details of each game.
+        'include_played_free_games': True  # Include games that are free and have been played at least once.
     }
-
-    # Makes a GET request to the constructed URL
-    response = requests.get(url, params=params)
-
-    # After the request it checks for the status code response. 200 is a successful request. Anything else is an error
-    if response.status_code == 200:
+    
+    # The 'try' block contains code that might throw an exception (error). If an error occurs, the 'except' block is executed.
+    try:
+        # Make a GET request to the Steam API with the specified URL and parameters.
+        response = requests.get(url, params=params)
+        # If the response was successful, no Exception will be raised.
+        response.raise_for_status()
+        # Convert the JSON response to a Python dictionary.
         data = response.json()
-        return data['response']['players'] # Returns dictionary containing player info if successful
-    else:
-        print(f"Error fetching player information: {response.status_code}")
-        return None # Returns None if unsuccessful
-
-# Example usage
-api_key = 'A65EA697948898E80E7B28E696A9DB05' #GameWrecks API key
-steam_ids = ['76561198039845746']  # My steam ID
-player_info = getSteamPlayerInfo(api_key, steam_ids)
-print(player_info) # Upon successful request the function extracts the JSON data from the response and returns the players key from the response dictionary which contains the players information
+        # Retrieve the list of games from the response data. Default to an empty list if 'games' key is not found.
+        games = data['response'].get('games', [])
+        # Create and return a list of dictionaries where each dictionary contains the name and total playtime of each game.
+        return [{'name': game['name'], 'playtime_forever': game['playtime_forever']} for game in games]
+    # This block handles any exceptions that occur during the HTTP request.
+    except requests.exceptions.RequestException as e:
+        # Print an error message if the HTTP request failed.
+        print(f"Request failed: {e}")
+        # Return None if an error occurs to indicate the failure of the API request.
+        return None
