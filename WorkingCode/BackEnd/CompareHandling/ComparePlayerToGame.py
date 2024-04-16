@@ -3,7 +3,8 @@ from InvalidListException import InvalidListException
 
 # Ticket 12
 class ComparePlayerToGame:
-
+    def __init__(self):
+        pass
     # Side formula: Used only in the main formula
     # Input: Two lists of ints or floats
     # Output: New list with listB[0] as newList[0] and the positive distance as newList[1]
@@ -31,7 +32,7 @@ class ComparePlayerToGame:
     # - all lists within enterList aren't the same registered size
     # - any idx in enterList isn't a list
 
-    def comparePlayerToGame(enterList: list, listSizes: int) -> list:
+    def comparePlayerToGame(self, enterList: list, listSizes: int):
 
         print("Start ComparePlayerToGame \n")
         shouldBeListSize = enterList[0].__sizeof__
