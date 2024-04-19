@@ -1,2 +1,2 @@
-class InvalidListException(Exception):
+class InvalidListException(BaseException):
     pass

@@ -3,7 +3,7 @@
 # Press Shift+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 from ComparePlayerToGame import ComparePlayerToGame
-import InvalidListException
+from InvalidListException import InvalidListException
 
 def testComparePlayerToGame():
     # Initialize three games, game1 being lowest bounds, game2 being avg case, and game3 being upper bounds.
@@ -19,13 +19,15 @@ def testComparePlayerToGame():
     enterList = [playerList, game1, game2, game3]
     try:
         returnList = CPTG.comparePlayerToGame(enterList, 4)
-    except:
-        print("Error has occurred. AvgCaseFail")
-    else:
         if(returnList[0][0] == "Game2" and returnList[1][0] == "Game1" and returnList[2][0] == "Game3"):
             print("Average Case test passed.\n")
         else:
             print("Average Case test failed. Check algorithms. \n")
+    except InvalidListException:
+        print("Known error has occurred. AvgCaseFail")
+    except BaseException:
+        print("Unknown error has occurred. AvgCaseFail")
+        
 
     print("\n \n")
 
