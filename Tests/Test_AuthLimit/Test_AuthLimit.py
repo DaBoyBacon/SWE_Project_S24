@@ -9,19 +9,41 @@ import AuthLimit
 
 class TestSteamNameCheck(unittest.TestCase):
 	def testAuthLimit(self):
-		print("testing")
 		
-		c = AuthLimit.APILimiter()
-		c.incCt()
-		c.incCt()
-		c.incCt()
-		self.assertEqual(c.getinc(), 3)
-		c.incCt()
-		c.incCt()
-		c.incCt()
-		self.assertEqual(c.getinc(), 6)
+		### This next part
+		### Is testing creating
+		### and incrementing
+
+		print("b4 setting scheduler")
+		t_var = AuthLimit.AuthTimer()
+
+		print("something's happening")
+		t_var.inc()
+		t_var.inc()
+		t_var.inc()
+		
+		self.assertEqual(t_var.getinc(), 3)
+
+		print("sleep for 10s")
+
+		time.sleep(10)
+
+		t_var.inc()
+		t_var.inc()
+		t_var.inc()
+		
+		
+		self.assertEqual(t_var.getinc(), 6)
+
+		print("Sleep for 60s")
+		time.sleep(60)
+		
+		self.assertEqual(t_var.getinc(), 0)
+		
+		print(t_var.getinc())
+
+		print("Can end :thumbs_up:")
 		#time.sleep(65)
-		self.assertEqual(c.getinc(), 0)
 		
 # throw's a fit if you don't put this
 if __name__ == '__main__':

@@ -1,39 +1,44 @@
-import threading
-import time
+import threading, time
 
+class AuthTimer:
+    
+    #Literally will never run. This avoids the "t doesn't exist" bs
+    def nothin(self):
+        print("literally nothing")
 
-class Timer(threading.Thread):
-
-    def __init__(self):
-        self._timer_runs = threading.Event()
-        self._timer_runs.set()
-        super().__init__()
-
-    def run(self):
-        while self._timer_runs.is_set():
-            self.timer()
-            time.sleep(self.__class__.interval)
-
-    def stop(self):
-        self._timer_runs.clear()
-
-class someTimer(Timer):
+    #IncrVal goes up with every API Call
+    incrVal = 0
+    #Interval is how many seconds before clearing incrVal
     interval = 60
-    inc = 0    
+
+    #t is the threading timer
+    t = threading.Timer(interval, nothin)
+
+    #Resets the incrVal
+    def do_something(self): 
+        # Do your stuff
+        print("Resetting inc...")
+        self.incrVal = 0
+        
+        #then reschedule (and re-start) your timer
+        self.t = threading.Timer(self.interval, self.do_something)
+        self.t.start()
+
+    #Initialize our timer
     def __init__(self):
-        self.inc = 0
+        self.incrVal = 0
         self.interval = 60
-
-    #func to ex
-    def timer(self):
-        print("Clear inc:" + self.inc)
-        self.inc = 0
+        self.do_something()
         
-    def inc(self):
-        self.inc = self.inc + 1
-        
-    def caninc(self) -> bool:
-        return True  if self.inc<60 else False
-
+    #Getter for incrVal
     def getinc(self):
-        return self.inc
+        return self.incrVal
+    
+    #If incrval < 60 every min, then True; if no more API allowed in the minute, return False
+    def canInc(self):
+        return True if self.incrVal < 60 else False
+    
+    # increments incrVal
+    def inc(self):
+        self.incrVal += 1
+    
