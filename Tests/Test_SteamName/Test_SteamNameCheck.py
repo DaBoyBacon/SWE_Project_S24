@@ -1,7 +1,6 @@
 #just to navigate back to test unit's directory
 import sys
-sys.path.append(sys.path[0]+"\\..\\..")
-
+sys.path.append(sys.path[0]+"\\..\\..\\WorkingCode\\BackEnd\\PlayerSteamHandling")
 #debug path
 #print(sys.path)
 
