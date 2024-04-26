@@ -2,6 +2,8 @@
 import requests  # This line imports the 'requests' library which is used for making HTTP requests in Python. If you are getting errors here you need to
 # install the requests library.
 
+global getOwnedGames
+
 # Define a function named 'getOwnedGames' which takes two parameters: 'apiKey' and 'steamId'. We need to figure a good way to input these from GUI.
 def getOwnedGames(apiKey, steamId):
     # This is the URL to Steam's GetOwnedGames API which returns a list of games owned by a specific user. Different URL's will return different info.
@@ -25,6 +27,9 @@ def getOwnedGames(apiKey, steamId):
         data = response.json()
         # Retrieve the list of games from the response data. Default to an empty list if 'games' key is not found.
         games = data['response'].get('games', [])
+        
+        #print(games) #Alex debugging, don't worry
+
         # Create and return a list of dictionaries where each dictionary contains the name and total playtime of each game.
         return [{'name': game['name'], 'playtime_forever': game['playtime_forever']} for game in games]
     # This block handles any exceptions that occur during the HTTP request.

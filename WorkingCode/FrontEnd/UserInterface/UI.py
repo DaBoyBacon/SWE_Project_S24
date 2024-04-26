@@ -1,4 +1,19 @@
+#just to navigate back to test unit's directory
+import sys
+sys.path.append(sys.path[0]+"\\..\\..\\BackEnd\\PlayerSteamHandling")
+sys.path.append(sys.path[0]+"\\..\\..\\BackEnd\\GameSteamHandling")
+sys.path.append(sys.path[0]+"\\..\\..\\BackEnd\\CompareHandling")
+print(sys.path)
+#debug path
 import tkinter as tk
+import PullPlayersTopGames
+import GetSteamPlayerInfo
+
+ALEXSTEAMID = 76561198085073544
+JOSHSTEAMID = 76561198872311178
+#ANDREW'S STM ID: idk yet
+SUPER_CONFIDENTIAL_API_KEY_THAT_WE_TOTALLY_DONT_WANT_STOLEN = "A65EA697948898E80E7B28E696A9DB05"
+
 MW = tk.Tk() #instance a window
 MW.title("GameWrecks") #change window title
 
@@ -10,36 +25,44 @@ gamesFrame.pack_forget()
 loginList = []
 gamesList = []
 
-def populateGames():
+UserAPIGames = []
+
+def populateGames(lst):
     global gamesList
-    for num in range(1,10+1):
-        txt = "Game" + str(num)
+    for num in range(0,len(lst)):
+        txt = lst[num]['name']
         w = tk.Message(text=txt)
         gamesList.append(w)
 
 def runButton():
-    global loginList, gamesList, loginFrame, gamesFrame
+    global loginList, gamesList, loginFrame, gamesFrame, JOSHSTEAMID, ALEXSTEAMID
     
     UserName = loginList[1].get()
     
     #local debug
     print(f"Run UN called:{UserName}")
     
-    
+    retLst = PullPlayersTopGames.pullPlayersTopGames(SUPER_CONFIDENTIAL_API_KEY_THAT_WE_TOTALLY_DONT_WANT_STOLEN, JOSHSTEAMID)
 
-    #make login widgets invis
-    loginFrame.pack_forget()
+    if retLst == None:
+        setToLogin()
+    else:
+        print("HOLY SHIT IT WORKED")
+        print(retLst)
+        #make login widgets invis
+        loginFrame.pack_forget()
     
-    populateGames()
+        populateGames(retLst)
     
-    for w in gamesList:
-        w.master = gamesFrame
+        for w in gamesList:
+            w.master = gamesFrame
         
-    for a in range(0,len(gamesList)):
-        gamesList[a].grid(row=int(a/5), column= a%5)
+        for a in range(0,len(gamesList)):
+            gamesList[a].grid(row=int(a/5), column= a%5)
+            gamesList[a].text = retLst[a]['name']
 
-    #Show games frame
-    gamesFrame.grid()
+        #Show games frame
+        gamesFrame.grid()
     
 def setToLogin():
     global gamesFrame, loginFrame, loginList
