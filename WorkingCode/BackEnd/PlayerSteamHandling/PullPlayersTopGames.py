@@ -2,7 +2,7 @@ import GetSteamPlayerInfo
 
 global pullPlayersTopGames
 
-def pullPlayersTopGames(apiKey, steamId, size=10):
+def pullPlayersTopGames(apiKey, steamId, size=10, display=False):
     
     games_info = GetSteamPlayerInfo.getOwnedGames(apiKey, steamId) # Retrieve game information for the specified Steam ID using the provided API key
 
@@ -12,11 +12,12 @@ def pullPlayersTopGames(apiKey, steamId, size=10):
         
         for i in range(0, size if len(top_games) > size else len(top_games)):
             top_ten_games.append(top_games[i])
-            
-        print("Top 10 Played Games:")
-        for game in top_ten_games: # Displays to the console formatted
-            hours_played = game['playtime_forever'] / 60
-            print(f"{game['name']} - {hours_played:.2f} hours")
+           
+        if(display):
+            print("Top 10 Played Games:")
+            for game in top_ten_games: # Displays to the console formatted
+                hours_played = game['playtime_forever'] / 60
+                print(f"{game['name']} - {hours_played:.2f} hours")
         return top_ten_games
     else: # Error catch
         print("No games data available.")

@@ -1,24 +1,26 @@
 #just to navigate back to test unit's directory
 import sys
+#Add our folders to path
 sys.path.append(sys.path[0]+"\\..\\..\\BackEnd\\PlayerSteamHandling")
 sys.path.append(sys.path[0]+"\\..\\..\\BackEnd\\GameSteamHandling")
 sys.path.append(sys.path[0]+"\\..\\..\\BackEnd\\CompareHandling")
-print(sys.path)
+
+#print(sys.path)
 #debug path
+
 import tkinter as tk
 import PullPlayersTopGames
 import GetSteamPlayerInfo
+import MatchGamesToScores
+import AlexCompare
 
 
 MW = tk.Tk() #instance a window
 MW.title("GameWrecks") #change window title
 
 loginFrame = tk.Frame(MW)
-loginFrame.pack()
 gamesFrame = tk.Frame(MW)
-gamesFrame.pack_forget()
 suggestFrame = tk.Frame(MW)
-suggestFrame.pack_forget()
 
 loginWList = []
 gamesWList = []
@@ -26,57 +28,103 @@ suggestWList =[]
 
 UserAPIGames = []
 SuggestedGames = []
+
+def populateSuggestions(SuggestGamesList):
+    global SuggestedGames, suggestWList, suggestFrame
+    suggestWList = suggestWList[:3]
+    for game in SuggestGamesList:
+        txt = game[0]
+        w = tk.Label(suggestFrame, text=txt, borderwidth=1, relief="solid")
+        SuggestedGames.append(txt)
+        suggestWList.append(w)
+
 def showRelated():
     global MW, gamesFrame, gamesWList, UserAPIGames, SuggestedGames
+
+
     #im shitting my pants ◐ ﹏ ◐
     #Hide gamesFrame
+    
     gamesFrame.grid_forget()
+    
     #for i in range(0,len(gamesWList)):
     #    gamesWList[i].grid_forget()
     #gamesWList.clear()
-    #Take list of games, turn it into list of lists: [[name,openWorld,combat,cartoon]].
-    scoreList = [["Minecraft", 10, 4, 7]]
-    
+    #Take list of games, turn it into list of lists: [[name,openWorld,combat,animation]].
+
+    #print("UserAPIGames: " , UserAPIGames)
+    gamesWithScores = MatchGamesToScores.MatchGamesToScores(sys.path[0]+"\\gamewrecks database.csv", UserAPIGames)
+
+    print("Games with scores: ", gamesWithScores)
 
     openWorld = 0 #ACs for categories; will be averaged
     combat = 0
-    cartoon = 0
+    animation = 0
     #for each category
     for cat in range(0,3):
         #for each game that we chose to consider
-        for gameScore in scoreList:
+        for gameScore in gamesWithScores:
             val = gameScore[1+cat] #val is the game's score for the current category
             if cat==0:
-                openWorld+=cat
+                openWorld+=val
             elif cat==1:
-                combat+=cat
+                combat+=val
             else:
-                cartoon+=cat
+                animation+=val
                 
-    openWorld/=len(scoreList)
-    combat/=len(scoreList)
-    cartoon/=len(scoreList)
-        
-        
+    #print(f"Totals | OW: {openWorld} | Cmb: {combat} | Anm: {animation}")
 
+    openWorld/=len(gamesWithScores)
+    combat/=len(gamesWithScores)
+    animation/=len(gamesWithScores)
+    
+    print(f"Totals Avg | OW: {openWorld} | Cmb: {combat} | Anm: {animation}")
+    
     #Call func that takes avgs and pairs them to Suggested games
 
+
+    
+
+
+    
     #Call func that takes Suggestion List and make shell for frame
 
+    if (len(suggestWList) <= 3):
+        suggestWList.append(tk.Spinbox(suggestFrame, from_=3, to=15))
+        suggestWList.append(tk.Button(suggestFrame, text="Re-Suggest", command=showRelated))
+        suggestWList.append(tk.Button(suggestFrame, text="Re-Consider", command=fetchGames))
+        
+        
+    totalList = AlexCompare.getDatabase([int(openWorld), int(combat), int(animation)], sys.path[0]+"\\gamewrecks database.csv", int(suggestWList[0].get()))
+
+    print("Final List:", totalList)
+    
+
     #Fill frame with Suggested Game names
+    populateSuggestions(totalList)
+    #print("children of SuggestFrame: ",suggestFrame.children)
+    
+    suggestWList[0].grid(row=0)
+    suggestWList[1].grid(row=1)
+    suggestWList[2].grid(row=2)
+    
+    for wInc in range(0, len(suggestWList)-3):
+        suggestWList[wInc+3].grid(row=int(wInc/5), column=(wInc%5)+1)
 
     #re-pack
+    suggestFrame.pack()
     
 def populateGames(lst):
-    global gamesWList
+    global gamesWList, gamesFrame
     gamesWList = gamesWList[:4]
     for num in range(0,len(lst)):
         txt = lst[num]['name']
-        w = tk.Message(text=txt, borderwidth=1, relief="solid")
+        w = tk.Label(gamesFrame, text=txt, borderwidth=1, relief="solid")
         gamesWList.append(w)
 
 def fetchGames():
-    global loginWList, gamesWList, loginFrame, gamesFrame, JOSHSTEAMID, ALEXSTEAMID, UserAPIGames
+    global loginWList, gamesWList, loginFrame, gamesFrame, JOSHSTEAMID, ALEXSTEAMID, UserAPIGames, suggestFrame
+    
     
     if(len(gamesWList)<4):
         gamesWList.clear()
@@ -90,20 +138,25 @@ def fetchGames():
     #local debug
     print(f"Run UN called:{UserName}")
     
-    retLst = PullPlayersTopGames.pullPlayersTopGames(SUPER_SECRET_KEY_THAT_SHOULDNT_BE_HARD_CODED, UserName, int(gamesWList[0].get()))
+    retLst = PullPlayersTopGames.pullPlayersTopGames("A65EA697948898E80E7B28E696A9DB05", UserName, int(gamesWList[0].get()))
 
     if retLst == None:
         setToLogin()
     else:
         loginFrame.grid_forget()
+        suggestFrame.grid_forget()
+        #un-pack login frame or suggest frame
+
         UserAPIGames.clear()
         for d in retLst:
             UserAPIGames.append(d['name'])
+        #Clear API list, and add list of games
+
         #print("HOLY SHIT IT WORKED")
         #print(retLst)
         #make login widgets invis
-        loginFrame.pack_forget()
     
+        #Create ur widgets
         populateGames(retLst)
         
         #Set all game MSGs to frame
@@ -123,12 +176,16 @@ def fetchGames():
         
 
         #Show games frame
-        gamesFrame.grid()
+        try:
+            gamesFrame.grid()
+        except :
+            gamesFrame.pack()
     
 def setToLogin():
     global gamesFrame, loginFrame, loginWList
+    gamesFrame.grid_forget()
     
-    gamesFrame.pack_forget()  #make games invis
+    #gamesFrame.pack_forget()  #make games invis
     
 
     if(len(loginWList) == 0):
@@ -148,8 +205,10 @@ def setToLogin():
         loginWList.append(InptUNBtn)
 
     #Make sure to "re-show" the login page
-    loginFrame.grid()
-
+    try:
+        loginFrame.grid()
+    except:
+        loginFrame.pack()
 
 setToLogin()
 
