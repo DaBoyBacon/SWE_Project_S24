@@ -4,6 +4,9 @@ global pullPlayersTopGames
 
 def pullPlayersTopGames(apiKey, steamId, size=10, display=False):
     
+    #print(f"PullTopGames.steamID: {steamId}")
+    #print(f"PullTopGames.ApiKey: {apiKey}")
+
     games_info = GetSteamPlayerInfo.getOwnedGames(apiKey, steamId) # Retrieve game information for the specified Steam ID using the provided API key
 
     if games_info: # Checks if game info is available
