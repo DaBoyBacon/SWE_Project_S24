@@ -2,7 +2,7 @@ import csv
 
 global getDatabase
 
-def getDatabase(AvgList, csv_file, numRecommend=5):
+def getDatabase(AvgList, csv_file, numRecommend=3):
     print(f"Avg list: {AvgList} | Num Rec: {numRecommend}")
     #if list exists and is [a,b,c]
     if (AvgList!= None):
@@ -17,16 +17,16 @@ def getDatabase(AvgList, csv_file, numRecommend=5):
                     score += (abs(int(row[2].strip()) - AvgList[1])) #score += diff btw Avg[b] and game[b]
                     score += (abs(int(row[3].strip()) - AvgList[2])) #score += diff btw Avg[b] and game[b]
                     gameScores.append([game_name, score])
-                    
+                 
             #print(f"okay, judged all the games: {gameScores}")
             ItScore = 0
             returnScores = []
             while True:
                 for game in gameScores:
                     if game[1] == ItScore:
-                        returnScores.append(game)
+                        returnScores.append(game[0])
                     if len(returnScores) >= numRecommend: 
-                        print(f"Suggest Limit Reached: {numRecommend}")
+                        #print(f"Suggest Limit Reached: {numRecommend}")
                         return returnScores
                 ItScore += 1
                 if (ItScore > 15):

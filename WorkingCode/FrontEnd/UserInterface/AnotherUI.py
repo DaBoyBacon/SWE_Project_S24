@@ -1,11 +1,12 @@
 #just to navigate back to test unit's directory
 import sys
 
+
 #Add our folders to path
 #print(sys.path)
-sys.path.append(sys.path[0]+"\\SWE_Project_S24\\WorkingCode\\BackEnd\\PlayerSteamHandling")
-sys.path.append(sys.path[0]+"\\SWE_Project_S24\\WorkingCode\\BackEnd\\GameSteamHandling")
-sys.path.append(sys.path[0]+"\\SWE_Project_S24\\WorkingCode\\BackEnd\\CompareHandling")
+sys.path.append(sys.path[0]+"\\..\\..\\BackEnd\\PlayerSteamHandling")
+sys.path.append(sys.path[0]+"\\..\\..\\BackEnd\\GameSteamHandling")
+sys.path.append(sys.path[0]+"\\..\\..\\BackEnd\\CompareHandling")
 #print(sys.path)
 
 #debug path
@@ -26,16 +27,19 @@ username = ""
 loginFrame = tk.Frame(MW)
 loginWidgets = []
 
-gamesFrame : tk.Frame
+gamesFrame = tk.Frame(MW)
 gamesWidgets = []
 
 UserAPIGames = []
 
+suggestFrame = tk.Frame(MW)
+suggestWidgets = []
+
 #returns list of strings
 def getGameNames(UN: str, numOfGames=5):
-    print(f"getGameNames.UN: {UN}")
+    #print(f"getGameNames.UN: {UN}")
     retDict = PullPlayersTopGames.pullPlayersTopGames("A65EA697948898E80E7B28E696A9DB05", UN, numOfGames) #Get user's top 5 games
-    print("return from pullPlayerTopGames", retDict)
+    #print("return from pullPlayerTopGames", retDict)
     gameList = []
     if (retDict != None):
         for d in retDict:
@@ -43,11 +47,102 @@ def getGameNames(UN: str, numOfGames=5):
             
     return gameList
 
+def getAvg(inptList):
+    openWorld = 0 #ACs for categories; will be averaged
+    combat = 0
+    animation = 0
+    #for each category
+    for cat in range(0,3):
+        #for each game that we chose to consider
+        for gameScore in inptList:
+            val = gameScore[1+cat] #val is the game's score for the current category
+            if cat==0:
+                openWorld+=val
+            elif cat==1:
+                combat+=val
+            else:
+                animation+=val
+                
+    #print(f"Totals | OW: {openWorld} | Cmb: {combat} | Anm: {animation}")
+
+    openWorld/=len(inptList)
+    combat/=len(inptList)
+    animation/=len(inptList)
+    
+    return [int(openWorld), int(combat), int(animation)]
+
+def populateSuggest(listOfGames):
+    global suggestFrame, suggestWidgets
+    print("Populate Suggest")
+    for name in listOfGames:
+        Lbl = tk.Label(suggestFrame, text = name, borderwidth=1, relief="solid")
+        suggestWidgets.append(Lbl)
+        
+    #grid populated suggestions
+    for wInc in range(0,len(listOfGames)):
+        suggestWidgets[wInc+3].grid(row=int(wInc/5),column=(wInc%5)+1)
+
+def refreshSuggest():
+    global suggestFrame, suggestWidgets
+    print("Run refreshSuggest")
+    
+    csvFilepath = sys.path[0]+"\\gamewrecks database.csv"
+    NewFrame = GamesFrame.getGameFrame(MW, refreshSuggest, clearSuggest, 3, 15)
+    suggestFrame.grid_remove()
+    suggestFrame = NewFrame[0]
+    
+    gamesWithScores = MatchGamesToScores.MatchGamesToScores(csvFilepath, UserAPIGames)
+    #gives us a listof [["game",a,b,c],["game2",a,b,c],...]
+
+    #gives avg of a, b, and c
+    avg = getAvg(gamesWithScores)
+    
+    #matches to n games
+    FinalList = AlexCompare.getDatabase(avg, csvFilepath, int(suggestWidgets[0].get()))
+    
+    #set new sugg widgets
+    suggestWidgets = NewFrame[1]
+    
+    print(f"FinalList: {FinalList}")
+    
+    #populate widgets w FinalList
+    populateSuggest(FinalList)
+    
+        
+    MW.grid()
+    
+def clearSuggest():
+    global MW, suggestFrame, suggestWidgets
+    print("Run clearSuggest")
+    suggestFrame.grid_remove()
+    suggestFrame = tk.Frame(MW)
+    suggestWidgets.clear()
+    MW.grid()
 
 def showSuggestions():
+    global suggestFrame, suggestWidgets, MW
     print("show Sugg")
+    csvFilepath = sys.path[0]+"\\gamewrecks database.csv"
+    NewFrame = GamesFrame.getGameFrame(MW, refreshSuggest, clearSuggest, 3, 15)
+    
+    suggestFrame = NewFrame[0]
+    suggestWidgets = NewFrame[1]
+    
+    gamesWithScores = MatchGamesToScores.MatchGamesToScores(csvFilepath, UserAPIGames)
+    #gives us a listof [["game",a,b,c],["game2",a,b,c],...]
+    avg = getAvg(gamesWithScores)
+    
+    FinalList = AlexCompare.getDatabase(avg, csvFilepath)
+    print(f"FinalList: {FinalList}")
+    
+    populateSuggest(FinalList)
+
+    
+    MW.grid()
+    
     
 
+#takes UserAPIGames, turns it into gamesWidgets, and loads those into grid
 def AddAPIGamesToFrame():
     global UserAPIGames, gamesFrame, gamesWidgets
     
@@ -62,13 +157,13 @@ def AddAPIGamesToFrame():
     for wInc in range(0,len(UserAPIGames)):
         gamesWidgets[wInc+4].grid(row=int(wInc/5), column=(wInc%5)+1)
 
-#change num of games shown in gamesFrame
+#change num of games shown in gamesFrame; for refresh
 def refreshGames():
-    global gamesFrame, UserAPIGames, gamesWidgets, username
+    global gamesFrame, UserAPIGames, gamesWidgets, username, suggestWidgets
     #print("refresh games")
     oldFrame = gamesFrame
     
-    NewFrame = GamesFrame.getGameFrame(MW, refreshGames, showSuggestions, clearGames)
+    NewFrame = GamesFrame.getGameFrame(MW, refreshGames, clearGames, nextFunc=showSuggestions)
     gamesFrame = NewFrame[0]
     
     UserAPIGames = getGameNames(username, int(gamesWidgets[0].get()))
@@ -77,16 +172,20 @@ def refreshGames():
     
     oldFrame.grid_remove()
     #print("Children leftover",oldFrame.children)
+    if len(suggestWidgets) > 0:
+        clearSuggest()
     
-    
-    
+#removes the Games widget; to go back to base login
 def clearGames():
     global gamesFrame, MW
     print("clear games")
     gamesFrame.grid_forget()
     gamesFrame = tk.Frame(MW)
+    if len(suggestWidgets) != 0:
+        clearSuggest()
+    MW.grid()
     
-
+#first load after clicking "login"
 def loadGameFrame(username):
     global UserAPIGames, gamesWidgets
     #do the stuff to add games to gameFrame
@@ -107,19 +206,27 @@ def loadGameFrame(username):
 
     
     
-
+#What happens when u click login; adds a the gameFrame
 def clickLogin():
-    global gamesFrame, MW, loginFrame, username, gamesWidgets
-    NewFrame = GamesFrame.getGameFrame(MW, refreshGames, showSuggestions, clearGames)
-    gamesFrame = NewFrame[0]
-    gamesWidgets = NewFrame[1].copy()
-    #print(f"ClickLogin.gamesWidgets: {gamesWidgets}")
-    gamesFrame.grid(row=2)
+    global gamesFrame, MW, loginFrame, username, gamesWidgets, suggestWidgets
     
     #load games into gamesFrame
     username = loginWidgets[1].get() 
     
-    loadGameFrame(username)
+    if len(getGameNames(username)) > 0:
+        if(len(suggestWidgets)>0):
+            clearSuggest()
+        if(len(gamesWidgets)>0):
+            clearGames()
+        
+        NewFrame = GamesFrame.getGameFrame(MW, refreshGames, clearGames, nextFunc=showSuggestions)
+        gamesFrame = NewFrame[0]
+        gamesWidgets = NewFrame[1].copy()
+        #print(f"ClickLogin.gamesWidgets: {gamesWidgets}")
+        gamesFrame.grid(row=2)
+        
+
+        loadGameFrame(username)
     
     
     
