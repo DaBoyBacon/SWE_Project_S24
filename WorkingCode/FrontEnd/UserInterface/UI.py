@@ -13,7 +13,7 @@ import PullPlayersTopGames
 import GetSteamPlayerInfo
 import MatchGamesToScores
 import AlexCompare
-
+import APIStorage
 
 MW = tk.Tk() #instance a window
 MW.title("GameWrecks") #change window title
@@ -28,6 +28,8 @@ suggestWList =[]
 
 UserAPIGames = []
 SuggestedGames = []
+
+APIKEY = APIStorage.getAPIKey()
 
 def populateSuggestions(SuggestGamesList):
     global SuggestedGames, suggestWList, suggestFrame
@@ -123,7 +125,7 @@ def populateGames(lst):
         gamesWList.append(w)
 
 def fetchGames():
-    global loginWList, gamesWList, loginFrame, gamesFrame, JOSHSTEAMID, ALEXSTEAMID, UserAPIGames, suggestFrame
+    global loginWList, gamesWList, loginFrame, gamesFrame, UserAPIGames, suggestFrame, APIKEY
     
     
     if(len(gamesWList)<4):
@@ -138,7 +140,7 @@ def fetchGames():
     #local debug
     print(f"Run UN called:{UserName}")
     
-    retLst = PullPlayersTopGames.pullPlayersTopGames("A65EA697948898E80E7B28E696A9DB05", UserName, int(gamesWList[0].get()))
+    retLst = PullPlayersTopGames.pullPlayersTopGames(APIKEY, UserName, int(gamesWList[0].get()))
 
     if retLst == None:
         setToLogin()

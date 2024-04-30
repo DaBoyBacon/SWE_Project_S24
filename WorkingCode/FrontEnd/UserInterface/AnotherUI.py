@@ -17,7 +17,7 @@ import GetSteamPlayerInfo
 import MatchGamesToScores
 import AlexCompare
 import GamesFrame
-
+import APIStorage
 
 MW = tk.Tk() #instance a window
 MW.title("GameWrecks") #change window title
@@ -35,10 +35,13 @@ UserAPIGames = []
 suggestFrame = tk.Frame(MW)
 suggestWidgets = []
 
+APIKEY = APIStorage.getAPIKey()
+
 #returns list of strings
 def getGameNames(UN: str, numOfGames=5):
+    global APIKEY
     #print(f"getGameNames.UN: {UN}")
-    retDict = PullPlayersTopGames.pullPlayersTopGames("A65EA697948898E80E7B28E696A9DB05", UN, numOfGames) #Get user's top 5 games
+    retDict = PullPlayersTopGames.pullPlayersTopGames(APIKEY, UN, numOfGames) #Get user's top 5 games
     #print("return from pullPlayerTopGames", retDict)
     gameList = []
     if (retDict != None):

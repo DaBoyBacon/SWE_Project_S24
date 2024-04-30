@@ -25,6 +25,7 @@ def getOwnedGames(apiKey, steamId):
         response.raise_for_status()
         # Convert the JSON response to a Python dictionary.
         data = response.json()
+        print(data)
         # Retrieve the list of games from the response data. Default to an empty list if 'games' key is not found.
         games = data['response'].get('games', [])
         
